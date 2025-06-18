@@ -3,7 +3,7 @@ package com.project.shopapp.utils;
 public class MessageKeys {
     public static final String LOGIN_SUCCESSFULLY = "user.login.login_successfully";
 
-    public static final String REGISTER_SUCCESSFULLY =  "user.login.register_successfully";
+    public static final String REGISTER_SUCCESSFULLY = "user.login.register_successfully";
 
     public static final String LOGIN_FAILED = "user.login.login_failed";
 
@@ -33,5 +33,6 @@ public class MessageKeys {
 
     public static final String ROLE_DOES_NOT_EXISTS = "user.login.role_not_exist";
 
+    public static final String UPLOAD_AVATAR_MAX_1 = "user.upload_avatar.error_more_than_1_images";
 
 }

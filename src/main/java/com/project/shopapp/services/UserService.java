@@ -3,6 +3,7 @@ package com.project.shopapp.services;
 import com.project.shopapp.components.JwtTokenUtils;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.UpdateUserDTO;
+import com.project.shopapp.dtos.UserAvatarDTO;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exceptions.DataNotFoundException;
 import com.project.shopapp.exceptions.ExpiredTokenException;
@@ -10,6 +11,7 @@ import com.project.shopapp.exceptions.PermissionDenyException;
 import com.project.shopapp.models.Role;
 import com.project.shopapp.models.Token;
 import com.project.shopapp.models.User;
+import com.project.shopapp.models.UserAvatar;
 import com.project.shopapp.repositories.RoleRepository;
 import com.project.shopapp.repositories.TokenRepository;
 import com.project.shopapp.repositories.UserRepository;
@@ -27,7 +29,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class UserService implements IUserService{
+public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -35,6 +37,7 @@ public class UserService implements IUserService{
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
     private final LocalizationUtils localizationUtils;
+
     @Override
     public User createUser(UserDTO userDTO) throws Exception {
         String phoneNumber = userDTO.getPhoneNumber();
@@ -43,13 +46,13 @@ public class UserService implements IUserService{
             throw new IllegalArgumentException("Phone number must be exactly 10 digits long");
         }
 
-        if(userRepository.existsByPhoneNumber(phoneNumber)){
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new DataIntegrityViolationException("Phone number already exists");
         }
         Role role = roleRepository.findById(userDTO.getRoleId())
                 .orElseThrow(() -> new DataNotFoundException(
                         localizationUtils.getLocalizedMessage(MessageKeys.ROLE_DOES_NOT_EXISTS)));
-        if(role.getName().toUpperCase().equals(Role.ADMIN)){
+        if (role.getName().toUpperCase().equals(Role.ADMIN)) {
             throw new PermissionDenyException("You cannot register an admin account");
         }
         User newUser = User.builder()
@@ -64,7 +67,7 @@ public class UserService implements IUserService{
                 .build();
 
         newUser.setRole(role);
-        if(userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0){
+        if (userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0) {
             String password = userDTO.getPassword();
             String encodedPassword = passwordEncoder.encode(password);
             newUser.setPassword(encodedPassword);
@@ -75,33 +78,31 @@ public class UserService implements IUserService{
     @Override
     public String login(String phoneNumber, String password, Long roleId) throws Exception {
         Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
-        if(optionalUser.isEmpty()){
+        if (optionalUser.isEmpty()) {
             throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.WRONG_PHONE_PASSWORD));
         }
-//        return optionalUser.get();
+        // return optionalUser.get();
         User existingUser = optionalUser.get();
-        if(existingUser.getFacebookAccountId() == 0
-                && existingUser.getGoogleAccountId() == 0){
-            if(!passwordEncoder.matches(password, existingUser.getPassword())){
+        if (existingUser.getFacebookAccountId() == 0
+                && existingUser.getGoogleAccountId() == 0) {
+            if (!passwordEncoder.matches(password, existingUser.getPassword())) {
                 throw new BadCredentialsException(
-                        localizationUtils.getLocalizedMessage(MessageKeys.WRONG_PHONE_PASSWORD)
-                );
+                        localizationUtils.getLocalizedMessage(MessageKeys.WRONG_PHONE_PASSWORD));
             }
         }
         Optional<Role> optionalRole = roleRepository.findById(roleId);
-        if(optionalRole.isEmpty() || !roleId.equals(existingUser.getRole().getId())){
+        if (optionalRole.isEmpty() || !roleId.equals(existingUser.getRole().getId())) {
             throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.ROLE_DOES_NOT_EXISTS));
         }
-        if(!optionalUser.get().isActive()){
+        if (!optionalUser.get().isActive()) {
             throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.USER_IS_LOCKED));
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 phoneNumber, password,
-                existingUser.getAuthorities()
-        );
+                existingUser.getAuthorities());
         authenticationManager.authenticate(authenticationToken);
-        return  jwtTokenUtils.generateToken(existingUser);
+        return jwtTokenUtils.generateToken(existingUser);
 
     }
 
@@ -112,7 +113,8 @@ public class UserService implements IUserService{
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
 
-        // Check if the phone number is being changed and if it already exists for another user
+        // Check if the phone number is being changed and if it already exists for
+        // another user
         String newPhoneNumber = updatedUserDTO.getPhoneNumber();
         if (!existingUser.getPhoneNumber().equals(newPhoneNumber) &&
                 userRepository.existsByPhoneNumber(newPhoneNumber)) {
@@ -142,26 +144,26 @@ public class UserService implements IUserService{
         // Update the password if it is provided in the DTO
         if (updatedUserDTO.getPassword() != null
                 && !updatedUserDTO.getPassword().isEmpty()) {
-            if(!updatedUserDTO.getPassword().equals(updatedUserDTO.getRetypePassword())) {
+            if (!updatedUserDTO.getPassword().equals(updatedUserDTO.getRetypePassword())) {
                 throw new DataNotFoundException("Password and retype password not the same");
             }
             String newPassword = updatedUserDTO.getPassword();
             String encodedPassword = passwordEncoder.encode(newPassword);
             existingUser.setPassword(encodedPassword);
         }
-        //existingUser.setRole(updatedRole);
+        // existingUser.setRole(updatedRole);
         // Save the updated user
         return userRepository.save(existingUser);
     }
 
     @Override
     public User getUserDetailsFromToken(String token) throws Exception {
-        if(jwtTokenUtils.isTokenExpired(token)){
+        if (jwtTokenUtils.isTokenExpired(token)) {
             throw new ExpiredTokenException("Token is expried");
         }
         String phoneNumber = jwtTokenUtils.extractPhoneNumber(token);
         Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
-        if(user.isPresent()){
+        if (user.isPresent()) {
             return user.get();
         } else {
             throw new Exception("User not found");
@@ -174,5 +176,7 @@ public class UserService implements IUserService{
         return getUserDetailsFromToken(existingToken.getToken());
     }
 
-
+    public User getUserById(Long userId) throws DataNotFoundException {
+        return this.userRepository.findById(userId).orElseThrow(() -> new DataNotFoundException("user not found"));
+    }
 }
