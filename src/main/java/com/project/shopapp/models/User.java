@@ -53,7 +53,7 @@ public class User extends BaseEntity implements UserDetails {
     private com.project.shopapp.models.Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private UserAvatar userAvatar; // Danh sách ảnh
+    private UserAvatar userAvatar;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

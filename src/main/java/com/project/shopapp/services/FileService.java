@@ -27,7 +27,8 @@ public class FileService {
     private final ProductImageRepository productImageRepository;
     private final UserAvatarRepository userAvatarRepository;
 
-    public UserAvatar createUserAvatar(Long userId, UserAvatarDTO userAvatarDTO) throws DataNotFoundException {
+    public UserAvatar createUserAvatar(Long userId, UserAvatarDTO userAvatarDTO)
+            throws DataNotFoundException, InvalidParamException {
 
         User existingUser = userRepository
                 .findById(userId)
@@ -37,12 +38,12 @@ public class FileService {
                 .user(existingUser)
                 .imageUrl(userAvatarDTO.getImageUrl())
                 .build();
-        // int size = productImageRepository.findByProductId(userId).size();
-        // if(size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
-        // throw new InvalidParamException(
-        // "Number of images must be <= "
-        // +ProductImage.MAXIMUM_IMAGES_PER_PRODUCT);
-        // }
+        int size = userAvatarRepository.findByUserId(userId).size();
+        if (size >= UserAvatar.MAXIMUM_IMAGES_PER_USER) {
+            throw new InvalidParamException(
+                    "Number of images must be <= "
+                            + UserAvatar.MAXIMUM_IMAGES_PER_USER);
+        }
         return this.userAvatarRepository.save(newUserAvatar);
 
     }
