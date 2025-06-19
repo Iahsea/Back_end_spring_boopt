@@ -153,7 +153,7 @@ public class FileController {
     @GetMapping("products/images/{imageName}")
     public ResponseEntity<?> viewProductImage(@PathVariable String imageName) {
         try {
-            java.nio.file.Path imagePath = Paths.get("uploads/" + imageName);
+            java.nio.file.Path imagePath = Paths.get("uploads`/" + imageName);
             UrlResource resource = new UrlResource(imagePath.toUri());
 
             if (resource.exists()) {
