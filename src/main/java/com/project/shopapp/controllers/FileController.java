@@ -51,7 +51,7 @@ public class FileController {
     // POST http://localhost:8088/v1/api/products
     public ResponseEntity<?> uploadImages(
             @PathVariable("id") Long productId,
-            @RequestParam("folder") String folder,
+            @RequestParam(defaultValue = "") String folder,
             @RequestParam(name = "files", required = false) List<MultipartFile> files) {
         try {
             Product existingProduct = productService.getProductById(productId);
@@ -150,10 +150,10 @@ public class FileController {
         }
     }
 
-    @GetMapping("/images/{imageName}")
+    @GetMapping("products/images/{imageName}")
     public ResponseEntity<?> viewProductImage(@PathVariable String imageName) {
         try {
-            java.nio.file.Path imagePath = Paths.get("uploads/products/" + imageName);
+            java.nio.file.Path imagePath = Paths.get("uploads/" + imageName);
             UrlResource resource = new UrlResource(imagePath.toUri());
 
             if (resource.exists()) {
@@ -163,7 +163,7 @@ public class FileController {
             } else {
                 return ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_JPEG)
-                        .body(new UrlResource(Paths.get("uploads/products/imagenotfound.jpg").toUri()));
+                        .body(new UrlResource(Paths.get("uploads/imagenotfound.jpg").toUri()));
                 // return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
