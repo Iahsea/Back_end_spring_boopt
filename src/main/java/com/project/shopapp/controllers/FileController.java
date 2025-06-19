@@ -151,9 +151,9 @@ public class FileController {
     }
 
     @GetMapping("/images/{imageName}")
-    public ResponseEntity<?> viewImage(@PathVariable String imageName) {
+    public ResponseEntity<?> viewProductImage(@PathVariable String imageName) {
         try {
-            java.nio.file.Path imagePath = Paths.get("uploads/" + imageName);
+            java.nio.file.Path imagePath = Paths.get("uploads/products/" + imageName);
             UrlResource resource = new UrlResource(imagePath.toUri());
 
             if (resource.exists()) {
@@ -163,7 +163,28 @@ public class FileController {
             } else {
                 return ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_JPEG)
-                        .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
+                        .body(new UrlResource(Paths.get("uploads/products/imagenotfound.jpg").toUri()));
+                // return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/avatars/{imageName}")
+    public ResponseEntity<?> viewAvatar(@PathVariable String imageName) {
+        try {
+            java.nio.file.Path imagePath = Paths.get("uploads/avatars/" + imageName);
+            UrlResource resource = new UrlResource(imagePath.toUri());
+
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+            } else {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(new UrlResource(Paths.get("uploads/avatars/defaultavatar.png").toUri()));
                 // return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {

@@ -102,6 +102,14 @@ public class WebSecurityConfig {
                                     String.format("%s/users/uploads/**", apiPrefix))
                             .hasAnyRole(Role.ADMIN, Role.USER)
 
+                            .requestMatchers(GET,
+                                    String.format("%s/avatars/**", apiPrefix))
+                            .hasAnyRole(Role.ADMIN, Role.USER)
+
+                            .requestMatchers(GET,
+                                    String.format("%s/images/**", apiPrefix))
+                            .permitAll()
+
                             .requestMatchers(PUT,
                                     String.format("%s/products/**", apiPrefix))
                             .hasAnyRole(Role.ADMIN)
