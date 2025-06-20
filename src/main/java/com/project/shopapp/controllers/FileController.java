@@ -36,6 +36,8 @@ import com.project.shopapp.services.UserService;
 import com.project.shopapp.utils.MessageKeys;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("${api.prefix}")
@@ -82,7 +84,8 @@ public class FileController {
                 }
 
                 // Lưu file và cập nhật thumbnail trong DTO
-                String filename = storeFile(file, folder); // Thay thế hàm này với code của bạn để lưu file
+                String filename = this.fileService.storeFile(file, folder); // Thay thế hàm này với code của bạn để lưu
+                                                                            // file
                 // lưu vào đối tượng product trong DB => sẽ làm sau
                 // lưu vào bảng product_images
                 ProductImage productImage = fileService.createProductImage(
@@ -135,7 +138,8 @@ public class FileController {
             }
 
             // Lưu file và cập nhật thumbnail trong DTO
-            String filename = storeFile(files, folder); // Thay thế hàm này với code của bạn để lưu file
+            String filename = this.fileService.storeFile(files, folder); // Thay thế hàm này với code của bạn để lưu
+                                                                         // file
             // lưu vào đối tượng product trong DB => sẽ làm sau
             // lưu vào bảng product_images
             UserAvatar userAvatar = fileService.createUserAvatar(
@@ -153,7 +157,7 @@ public class FileController {
     @GetMapping("products/images/{imageName}")
     public ResponseEntity<?> viewProductImage(@PathVariable String imageName) {
         try {
-            java.nio.file.Path imagePath = Paths.get("uploads`/" + imageName);
+            java.nio.file.Path imagePath = Paths.get("uploads/" + imageName);
             UrlResource resource = new UrlResource(imagePath.toUri());
 
             if (resource.exists()) {
@@ -192,24 +196,34 @@ public class FileController {
         }
     }
 
-    private String storeFile(MultipartFile file, String folder) throws IOException {
-        if (file.getOriginalFilename() == null) {
-            throw new IOException("Invalid image format");
-        }
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
-        // Thêm UUID vào trước tên file để đảm bảo tên file là duy nhất
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + filename;
-        // Đường dẫn đến thư mục mà bạn muốn lưu file
-        java.nio.file.Path uploadDir = Paths.get("uploads", folder);
-        // Kiểm tra và tạo thư mục nếu nó không tồn tại
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        // Đường dẫn đầy đủ đến file
-        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
-        // Sao chép file vào thư mục đích
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-        return uniqueFilename;
-    }
+    // @PutMapping("avatars/{id}")
+    // public ResponseEntity<?> putMethodName(@PathVariable Long userId,
+    // @RequestParam("files") MultipartFile files) throws Exception {
+    // User existingUser = userService.getUserById(userId);
+    // if (files.getSize() > 10 * 1024 * 1024) { // Kích thước > 10MB
+    // return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+    // .body(localizationUtils
+    // .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
+    // }
+
+    // String fileName = files.getOriginalFilename();
+    // List<String> allowedExtensions = Arrays.asList("pdf", "jpg", "jpeg", "png",
+    // "doc", "docx");
+    // boolean isValidExtension = allowedExtensions.stream()
+    // .anyMatch(item -> fileName.toLowerCase().endsWith("." + item));
+
+    // if (!isValidExtension) {
+    // throw new Exception("Invalid file extension. Only allow " +
+    // allowedExtensions.toString());
+    // }
+
+    // String filename = this.fileService.storeFile(files, "avatars"); // Thay thế
+    // hàm này với code của bạn để lưu file
+
+    // this.fileService.updateUserAvatar(existingUser.getId(), filename);
+
+    // return
+    // ResponseEntity.ok().body(localizationUtils.getLocalizedMessage(MessageKeys.UPDATE_AVATAR_SUCCESSFULLY));
+    // }
 
 }

@@ -14,6 +14,7 @@ import com.project.shopapp.models.User;
 import com.project.shopapp.models.UserAvatar;
 import com.project.shopapp.repositories.RoleRepository;
 import com.project.shopapp.repositories.TokenRepository;
+import com.project.shopapp.repositories.UserAvatarRepository;
 import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.utils.MessageKeys;
 import jakarta.transaction.Transactional;
@@ -37,6 +38,7 @@ public class UserService implements IUserService {
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
     private final LocalizationUtils localizationUtils;
+    private final FileService fileService;
 
     @Override
     public User createUser(UserDTO userDTO) throws Exception {
@@ -108,18 +110,23 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public User updateUser(Long userId, UpdateUserDTO updatedUserDTO) throws Exception {
+    public User updateUser(Long userId, UpdateUserDTO updatedUserDTO, String filename) throws Exception {
         // Find the existing user by userId
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
 
         // Check if the phone number is being changed and if it already exists for
         // another user
+        // if (updatedUserDTO == null) {
+        // updatedUserDTO = new UpdateUserDTO();
+        // }
         String newPhoneNumber = updatedUserDTO.getPhoneNumber();
         if (!existingUser.getPhoneNumber().equals(newPhoneNumber) &&
                 userRepository.existsByPhoneNumber(newPhoneNumber)) {
             throw new DataIntegrityViolationException("Phone number already exists");
         }
+
+        this.fileService.updateUserAvatar(existingUser, filename);
 
         // Update user information based on the DTO
         if (updatedUserDTO.getFullName() != null) {
@@ -131,6 +138,10 @@ public class UserService implements IUserService {
         if (updatedUserDTO.getAddress() != null) {
             existingUser.setAddress(updatedUserDTO.getAddress());
         }
+        // if (updatedUserDTO.getUserAvatar() != null) {
+        // existingUser.setUserAvatar(this.fileService.updateUserAvatar(userId,
+        // filename));
+        // }
         if (updatedUserDTO.getDateOfBirth() != null) {
             existingUser.setDateOfBirth(updatedUserDTO.getDateOfBirth());
         }

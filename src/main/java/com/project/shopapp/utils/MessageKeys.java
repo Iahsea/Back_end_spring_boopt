@@ -35,4 +35,6 @@ public class MessageKeys {
 
     public static final String UPLOAD_AVATAR_MAX_1 = "user.upload_avatar.error_more_than_1_images";
 
+    public static final String UPDATE_AVATAR_SUCCESSFULLY = "user.update_avatar.successfully";
+
 }

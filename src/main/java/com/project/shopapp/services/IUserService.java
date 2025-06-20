@@ -15,6 +15,6 @@ public interface IUserService {
 
     User getUserDetailsFromRefreshToken(String token) throws Exception;
 
-    User updateUser(Long userId, UpdateUserDTO updatedUserDTO) throws Exception;
+    User updateUser(Long userId, UpdateUserDTO updatedUserDTO, String filename) throws Exception;
     // UserAvatar createUserAvatar(Long id, UserAvatarDTO userAvatarDTO);
 }

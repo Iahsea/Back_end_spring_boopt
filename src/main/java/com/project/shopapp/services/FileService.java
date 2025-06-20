@@ -1,7 +1,17 @@
 package com.project.shopapp.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 // import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.project.shopapp.dtos.ProductImageDTO;
 import com.project.shopapp.dtos.UserAvatarDTO;
@@ -38,7 +48,9 @@ public class FileService {
                 .user(existingUser)
                 .imageUrl(userAvatarDTO.getImageUrl())
                 .build();
-        int size = userAvatarRepository.findByUserId(userId).size();
+        int size = userAvatarRepository.findByUserId(userId).isPresent()
+                ? userAvatarRepository.findByUserId(userId).get().size()
+                : 0;
         if (size >= UserAvatar.MAXIMUM_IMAGES_PER_USER) {
             throw new InvalidParamException(
                     "Number of images must be <= "
@@ -66,6 +78,39 @@ public class FileService {
                             + ProductImage.MAXIMUM_IMAGES_PER_PRODUCT);
         }
         return productImageRepository.save(newProductImage);
+    }
+
+    public String storeFile(MultipartFile file, String folder) throws IOException {
+        if (file.getOriginalFilename() == null) {
+            throw new IOException("Invalid image format");
+        }
+        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+        // Thêm UUID vào trước tên file để đảm bảo tên file là duy nhất
+        String uniqueFilename = UUID.randomUUID().toString() + "_" + filename;
+        // Đường dẫn đến thư mục mà bạn muốn lưu file
+        java.nio.file.Path uploadDir = Paths.get("uploads", folder);
+        // Kiểm tra và tạo thư mục nếu nó không tồn tại
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+        // Đường dẫn đầy đủ đến file
+        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
+        // Sao chép file vào thư mục đích
+        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+        return uniqueFilename;
+    }
+
+    public UserAvatar updateUserAvatar(User user, String fileName) {
+        Optional<List<UserAvatar>> userAvatarOptional = this.userAvatarRepository.findByUserId(user.getId());
+        UserAvatar userAvatar;
+        if (userAvatarOptional.isPresent() && !userAvatarOptional.get().isEmpty()) {
+            userAvatar = userAvatarOptional.get().get(0); // Lấy avatar đầu tiên
+        } else {
+            userAvatar = new UserAvatar();
+            userAvatar.setUser(user); // Gán user mới cho avatar nếu chưa có
+        }
+        userAvatar.setImageUrl(fileName);
+        return userAvatarRepository.save(userAvatar);
     }
 
 }

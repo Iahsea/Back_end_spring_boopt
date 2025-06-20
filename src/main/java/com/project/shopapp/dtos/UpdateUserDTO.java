@@ -35,4 +35,7 @@ public class UpdateUserDTO {
 
     @JsonProperty("google_account_id")
     private int googleAccountId;
+
+    // @JsonProperty("user_avatar")
+    // private String userAvatar;
 }

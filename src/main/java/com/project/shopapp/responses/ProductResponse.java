@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductResponse extends BaseResponse{
+public class ProductResponse extends BaseResponse {
     private Long id;
     private String name;
     private Float price;
@@ -26,10 +26,11 @@ public class ProductResponse extends BaseResponse{
     private String description;
     @JsonProperty("category_id")
     private Long categoryId;
+
+    @JsonProperty("product_images")
     private List<String> productImages; // Danh sách URL của ảnh
 
-
-    public static ProductResponse fromProduct(Product product){
+    public static ProductResponse fromProduct(Product product) {
         ProductResponse productResponse = ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -40,13 +41,11 @@ public class ProductResponse extends BaseResponse{
                 .productImages(
                         product.getProductImages().stream()
                                 .map(ProductImage::getImageUrl) // Lấy URL từ ProductImage
-                                .collect(Collectors.toList())
-                )
+                                .collect(Collectors.toList()))
                 .build();
         productResponse.setCreatedAt(product.getCreatedAt());
         productResponse.setUpdatedAt(product.getUpdatedAt());
-        return  productResponse;
+        return productResponse;
     }
-
 
 }

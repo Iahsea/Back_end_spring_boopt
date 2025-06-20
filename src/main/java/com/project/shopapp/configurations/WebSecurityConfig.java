@@ -104,6 +104,10 @@ public class WebSecurityConfig {
 
                             .requestMatchers(GET,
                                     String.format("%s/avatars/**", apiPrefix))
+                            .permitAll()
+
+                            .requestMatchers(PUT,
+                                    String.format("%s/users/**", apiPrefix))
                             .hasAnyRole(Role.ADMIN, Role.USER)
 
                             .requestMatchers(GET,
