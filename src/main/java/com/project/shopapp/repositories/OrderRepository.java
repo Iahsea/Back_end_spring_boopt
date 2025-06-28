@@ -10,8 +10,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    //Tìm các đơn hàng của 1 user nào đó
+    // Tìm các đơn hàng của 1 user nào đó
     List<Order> findByUserId(Long userId);
+
     @Query("SELECT o FROM Order o WHERE o.active = true AND (:keyword IS NULL OR :keyword = '' OR " +
             "o.fullName LIKE %:keyword% " +
             "OR o.address LIKE %:keyword% " +
