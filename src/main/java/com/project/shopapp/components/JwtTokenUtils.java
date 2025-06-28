@@ -1,6 +1,5 @@
 package com.project.shopapp.components;
 
-
 import com.project.shopapp.exceptions.InvalidParamException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,7 +9,6 @@ import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +26,13 @@ public class JwtTokenUtils {
 
     @Value("${jwt.secretKey}")
     private String secretKey;
-    public String generateToken(com.project.shopapp.models.User user) throws Exception{
+
+    public String generateToken(com.project.shopapp.models.User user) throws Exception {
         Map<String, Object> claims = new HashMap<>();
-        //this.generateSecretKey();
+        // this.generateSecretKey();
         claims.put("phoneNumber", user.getPhoneNumber());
         claims.put("userId", user.getId());
-        try{
+        try {
             String token = Jwts.builder()
                     .setClaims(claims)
                     .setSubject(user.getPhoneNumber())
@@ -42,19 +41,18 @@ public class JwtTokenUtils {
                     .compact();
             return token;
         } catch (Exception e) {
-            throw new InvalidParamException("Cannot create jwt token, error: "+e.getMessage());
-//            return null;
+            throw new InvalidParamException("Cannot create jwt token, error: " + e.getMessage());
+            // return null;
         }
     }
 
-
-    private Key getSignInKey(){
+    private Key getSignInKey() {
         byte[] bytes = Decoders.BASE64.decode(secretKey);
-        //Keys.hmacShaKeyFor(Decoders.BASE64.decode("pQqqsu6+P1/ea3XSKpuF2+Zv3X6xSk72ciAS0Q4JoxY="))
+        // Keys.hmacShaKeyFor(Decoders.BASE64.decode("pQqqsu6+P1/ea3XSKpuF2+Zv3X6xSk72ciAS0Q4JoxY="))
         return Keys.hmacShaKeyFor(bytes);
     }
 
-    private String generateSecretKey(){
+    private String generateSecretKey() {
         SecureRandom random = new SecureRandom();
         byte[] keyBytes = new byte[32];
         random.nextBytes(keyBytes);
@@ -62,7 +60,7 @@ public class JwtTokenUtils {
         return secretKey;
     }
 
-    private Claims extractAllClaims(String token){
+    private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
@@ -70,12 +68,12 @@ public class JwtTokenUtils {
                 .getBody();
     }
 
-    public <T> T extractClaims(String token, Function<Claims, T> claimsResolver){
+    public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = this.extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    public boolean isTokenExpired(String token){
+    public boolean isTokenExpired(String token) {
         Date expirationDate = this.extractClaims(token, Claims::getExpiration);
         return expirationDate.before(new Date());
     }
@@ -84,7 +82,7 @@ public class JwtTokenUtils {
         return extractClaims(token, Claims::getSubject);
     }
 
-    public boolean validateToken(String token, UserDetails userDetails){
+    public boolean validateToken(String token, UserDetails userDetails) {
         String phoneNumber = extractPhoneNumber(token);
         return (phoneNumber.equals(userDetails.getUsername()))
                 && !isTokenExpired(token);

@@ -4,17 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.shopapp.models.Order;
 import com.project.shopapp.models.OrderDetail;
 import lombok.*;
-import org.apache.commons.lang3.builder.HashCodeExclude;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderResponse{
+public class OrderResponse {
     private Long id;
 
     @JsonProperty("user_id")
@@ -36,7 +35,7 @@ public class OrderResponse{
     private String note;
 
     @JsonProperty("order_date")
-    //@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    // @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private LocalDate orderDate;
 
     @JsonProperty("status")
@@ -61,7 +60,7 @@ public class OrderResponse{
     private List<OrderDetail> orderDetails;
 
     public static OrderResponse fromOrder(Order order) {
-        OrderResponse orderResponse =  OrderResponse
+        OrderResponse orderResponse = OrderResponse
                 .builder()
                 .id(order.getId())
                 .userId(order.getUser().getId())

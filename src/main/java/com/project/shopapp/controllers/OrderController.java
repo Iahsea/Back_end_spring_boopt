@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.List;
 
@@ -27,20 +26,20 @@ import java.util.List;
 public class OrderController {
     private final IOrderService orderService;
     private final LocalizationUtils localizationUtils;
+
     @PostMapping("")
     public ResponseEntity<?> createOrder(
             @Valid @RequestBody OrderDTO orderDTO,
-            BindingResult result
-    ) {
+            BindingResult result) {
         try {
-            if(result.hasErrors()) {
+            if (result.hasErrors()) {
                 List<String> errorMessages = result.getFieldErrors()
                         .stream()
                         .map(FieldError::getDefaultMessage)
                         .toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
-            Order orderResponse =  orderService.createOrder(orderDTO);
+            Order orderResponse = orderService.createOrder(orderDTO);
             return ResponseEntity.ok(orderResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -48,7 +47,7 @@ public class OrderController {
     }
 
     @GetMapping("/user/{user_id}") // Thêm biến đường dẫn "user_id"
-    //GET http://localhost:8088/api/v1/orders/user/4
+    // GET http://localhost:8088/api/v1/orders/user/4
     public ResponseEntity<?> getOrders(@Valid @PathVariable("user_id") Long userId) {
         try {
             List<Order> orders = orderService.findByUserId(userId);
@@ -59,7 +58,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}") // Thêm biến đường dẫn "user_id"
-    //GET http://localhost:8088/api/v1/orders/4
+    // GET http://localhost:8088/api/v1/orders/4
     public ResponseEntity<?> getOrder(@Valid @PathVariable("id") Long orderId) {
         try {
             Order existingOrder = orderService.getOrder(orderId);
@@ -69,9 +68,10 @@ public class OrderController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @PutMapping("/{id}")
-    //PUT http://localhost:8088/api/v1/orders/2
-    //công việc của admin
+    // PUT http://localhost:8088/api/v1/orders/2
+    // công việc của admin
     public ResponseEntity<?> updateOrder(
             @Valid @PathVariable long id,
             @Valid @RequestBody OrderDTO orderDTO) {
@@ -82,9 +82,10 @@ public class OrderController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteOrder(@Valid @PathVariable Long id) {
-        //xóa mềm => cập nhật trường active = false
+        // xóa mềm => cập nhật trường active = false
         orderService.deleteOrder(id);
         String result = localizationUtils.getLocalizedMessage(
                 MessageKeys.DELETE_ORDER_SUCCESSFULLY, id);
@@ -94,16 +95,14 @@ public class OrderController {
     @GetMapping("/get-orders-by-keyword")
     @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<OrderListResponse> getOrdersByKeyword(
-        @RequestParam(defaultValue = "", required = false) String keyword,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int limit
-    ){
+            @RequestParam(defaultValue = "", required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int limit) {
         // Tạo Pageable từ thông tin trang và giới hạn
         PageRequest pageRequest = PageRequest.of(
                 page, limit,
-                //Sort.by("createdAt").descending()
-                Sort.by("id").ascending()
-        );
+                // Sort.by("createdAt").descending()
+                Sort.by("id").ascending());
         Page<OrderResponse> orderPage = orderService
                 .getOrdersByKeyword(keyword, pageRequest)
                 .map(OrderResponse::fromOrder);
@@ -112,8 +111,8 @@ public class OrderController {
         List<OrderResponse> orderResponses = orderPage.getContent();
         return ResponseEntity.ok(OrderListResponse
                 .builder()
-                        .orders(orderResponses)
-                        .totalPages(totalPages)
+                .orders(orderResponses)
+                .totalPages(totalPages)
                 .build());
     }
 }

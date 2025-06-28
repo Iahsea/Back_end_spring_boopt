@@ -1,14 +1,6 @@
 package com.project.shopapp.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.project.shopapp.models.Category;
-import com.project.shopapp.models.OrderDetail;
-import com.project.shopapp.models.Product;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Date;
@@ -46,6 +38,7 @@ public class UserResponse {
 
     @JsonProperty("role")
     private com.project.shopapp.models.Role role;
+
     public static UserResponse fromUser(com.project.shopapp.models.User user) {
         return UserResponse.builder()
                 .id(user.getId())
