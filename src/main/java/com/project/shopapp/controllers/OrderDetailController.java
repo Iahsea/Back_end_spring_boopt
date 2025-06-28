@@ -3,7 +3,6 @@ package com.project.shopapp.controllers;
 import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.*;
 import com.project.shopapp.exceptions.DataNotFoundException;
-import com.project.shopapp.models.Order;
 import com.project.shopapp.models.OrderDetail;
 import com.project.shopapp.responses.OrderDetailResponse;
 import com.project.shopapp.services.OrderDetailService;
@@ -11,10 +10,7 @@ import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.List;
 
@@ -24,10 +20,11 @@ import java.util.List;
 public class OrderDetailController {
     private final OrderDetailService orderDetailService;
     private final LocalizationUtils localizationUtils;
-    //Thêm mới 1 order detail
+
+    // Thêm mới 1 order detail
     @PostMapping("")
     public ResponseEntity<?> createOrderDetail(
-            @Valid  @RequestBody OrderDetailDTO orderDetailDTO) {
+            @Valid @RequestBody OrderDetailDTO orderDetailDTO) {
         try {
             OrderDetail newOrderDetail = orderDetailService.createOrderDetail(orderDetailDTO);
             return ResponseEntity.ok().body(OrderDetailResponse.fromOrderDetail(newOrderDetail));
@@ -36,21 +33,18 @@ public class OrderDetailController {
         }
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderDetail(
             @Valid @PathVariable("id") Long id) throws DataNotFoundException {
         OrderDetail orderDetail = orderDetailService.getOrderDetail(id);
         return ResponseEntity.ok().body(OrderDetailResponse.fromOrderDetail(orderDetail));
-//        return ResponseEntity.ok(orderDetail);
+        // return ResponseEntity.ok(orderDetail);
     }
 
-
-    //lấy ra danh sách các order_details của 1 order nào đó
+    // lấy ra danh sách các order_details của 1 order nào đó
     @GetMapping("/order/{orderId}")
     public ResponseEntity<?> getOrderDetails(
-            @Valid @PathVariable("orderId") Long orderId
-    ) {
+            @Valid @PathVariable("orderId") Long orderId) {
         List<OrderDetail> orderDetails = orderDetailService.findByOrderId(orderId);
         List<OrderDetailResponse> orderDetailResponses = orderDetails
                 .stream()
@@ -71,7 +65,6 @@ public class OrderDetailController {
         }
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrderDetail(
             @Valid @PathVariable("id") Long id) {
@@ -79,6 +72,6 @@ public class OrderDetailController {
         return ResponseEntity.ok()
                 .body(localizationUtils
                         .getLocalizedMessage(MessageKeys.DELETE_ORDER_DETAIL_SUCCESSFULLY, id));
-//        return ResponseEntity.noContent().build();
+        // return ResponseEntity.noContent().build();
     }
 }

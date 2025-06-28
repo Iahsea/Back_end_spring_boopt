@@ -14,10 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -32,11 +30,11 @@ public class UserController {
     private final IUserService userService;
     private final ITokenService tokenService;
     private final LocalizationUtils localizationUtils;
+
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> createUser(
             @Valid @RequestBody UserDTO userDTO,
-            BindingResult result
-    ) {
+            BindingResult result) {
         RegisterResponse registerResponse = new RegisterResponse();
 
         if (result.hasErrors()) {
@@ -64,11 +62,11 @@ public class UserController {
             return ResponseEntity.badRequest().body(registerResponse);
         }
     }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody UserLoginDTO userLoginDTO,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         // Kiểm tra thông tin đăng nhập và sinh token
         try {
             String token = userService.login(
@@ -78,71 +76,73 @@ public class UserController {
             User userDetail = userService.getUserDetailsFromToken(token);
             Token jwtToken = tokenService.addToken(userDetail, token);
             return ResponseEntity.ok(LoginResponse.builder()
-                            .id(userDetail.getId())
-                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
-                            .token(jwtToken.getToken())
-                            .tokenType(jwtToken.getTokenType())
-                            .refreshToken(jwtToken.getRefreshToken())
-                            .username(userDetail.getUsername())
-                            .roles(userDetail.getAuthorities().stream().map(item -> item.getAuthority()).toList())
+                    .id(userDetail.getId())
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
+                    .token(jwtToken.getToken())
+                    .tokenType(jwtToken.getTokenType())
+                    .refreshToken(jwtToken.getRefreshToken())
+                    .username(userDetail.getUsername())
+                    .roles(userDetail.getAuthorities().stream().map(item -> item.getAuthority()).toList())
                     .build());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     LoginResponse.builder()
-                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage())) // Trực tiếp sử dụng thông báo từ exception
-                            .build()
-            );
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage())) // Trực
+                                                                                                                      // tiếp
+                                                                                                                      // sử
+                                                                                                                      // dụng
+                                                                                                                      // thông
+                                                                                                                      // báo
+                                                                                                                      // từ
+                                                                                                                      // exception
+                            .build());
         }
         // Trả về token trong response
     }
 
     @PostMapping("/refreshToken")
     public ResponseEntity<LoginResponse> refreshToken(
-            @Valid @RequestBody RefreshTokenDTO refreshTokenDTO
-    ) {
+            @Valid @RequestBody RefreshTokenDTO refreshTokenDTO) {
         try {
             User userDetail = userService.getUserDetailsFromRefreshToken(refreshTokenDTO.getRefreshToken());
             Token jwtToken = tokenService.refreshToken(refreshTokenDTO.getRefreshToken(), userDetail);
             return ResponseEntity.ok(LoginResponse.builder()
-                            .message("Refresh token successfully")
-                            .token(jwtToken.getToken())
-                            .tokenType(jwtToken.getTokenType())
-                            .refreshToken(jwtToken.getRefreshToken())
-                            .username(userDetail.getUsername())
-                            .roles(userDetail.getAuthorities().stream().map(item -> item.getAuthority()).toList())
-                            .id(userDetail.getId())
+                    .message("Refresh token successfully")
+                    .token(jwtToken.getToken())
+                    .tokenType(jwtToken.getTokenType())
+                    .refreshToken(jwtToken.getRefreshToken())
+                    .username(userDetail.getUsername())
+                    .roles(userDetail.getAuthorities().stream().map(item -> item.getAuthority()).toList())
+                    .id(userDetail.getId())
                     .build());
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     LoginResponse.builder()
                             .message("Login failed: " + e.getMessage()) // Trực tiếp sử dụng thông báo từ exception
-                            .build()
-            );
+                            .build());
         }
     }
 
     @PostMapping("/details")
     public ResponseEntity<UserResponse> getUserDetails(
-            @RequestHeader("Authorization") String authorizationHeader
-    ) {
+            @RequestHeader("Authorization") String authorizationHeader) {
         try {
             String extactedToken = authorizationHeader.substring(7); // Loại bỏ "Bearer " từ chuỗi token
             User user = userService.getUserDetailsFromToken(extactedToken);
             return ResponseEntity.ok(UserResponse.fromUser(user));
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/details/{userId}")
-//    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
-//    @Operation(security = { @SecurityRequirement(name = "bearer-key") })
+    // @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    // @Operation(security = { @SecurityRequirement(name = "bearer-key") })
     public ResponseEntity<UserResponse> updateUserDetails(
             @PathVariable Long userId,
             @RequestBody UpdateUserDTO updatedUserDTO,
-            @RequestHeader("Authorization") String authorizationHeader
-    ) {
+            @RequestHeader("Authorization") String authorizationHeader) {
         try {
             String extractedToken = authorizationHeader.substring(7);
             User user = userService.getUserDetailsFromToken(extractedToken);
