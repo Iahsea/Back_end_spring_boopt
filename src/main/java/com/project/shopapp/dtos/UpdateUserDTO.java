@@ -14,8 +14,8 @@ public class UpdateUserDTO {
     @JsonProperty("fullname")
     private String fullName;
 
-    @JsonProperty("phone_number")
-    private String phoneNumber;
+    // @JsonProperty("phone_number")
+    // private String phoneNumber;
 
     private String address;
 
@@ -28,11 +28,11 @@ public class UpdateUserDTO {
     @JsonProperty("date_of_birth")
     private Date dateOfBirth;
 
-    @JsonProperty("facebook_account_id")
-    private int facebookAccountId;
+    // @JsonProperty("facebook_account_id")
+    // private int facebookAccountId;
 
-    @JsonProperty("google_account_id")
-    private int googleAccountId;
+    // @JsonProperty("google_account_id")
+    // private int googleAccountId;
 
     // @JsonProperty("user_avatar")
     // private String userAvatar;

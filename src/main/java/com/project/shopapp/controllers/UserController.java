@@ -141,7 +141,7 @@ public class UserController {
     // @PostMapping("/details/{userId}")
     // @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     // @Operation(security = { @SecurityRequirement(name = "bearer-key") })
-    @PostMapping(value = "/details/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/details/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateUserDetails(
             @PathVariable Long userId,
             @RequestPart(value = "user", required = false) UpdateUserDTO updatedUserDTO,
@@ -156,25 +156,25 @@ public class UserController {
             }
 
             // lưu file
-            if (avatar.getSize() > 10 * 1024 * 1024) { // Kích thước > 10MB
-                return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                        .body(localizationUtils
-                                .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
+            String filename = null;
+
+            if (avatar != null && !avatar.isEmpty()) {
+                if (avatar.getSize() > 10 * 1024 * 1024) { // >10MB
+                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                            .body(localizationUtils.getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
+                }
+
+                String fileName = avatar.getOriginalFilename();
+                List<String> allowedExtensions = Arrays.asList("pdf", "jpg", "jpeg", "png", "doc", "docx");
+                boolean isValidExtension = allowedExtensions.stream()
+                        .anyMatch(ext -> fileName.toLowerCase().endsWith("." + ext));
+
+                if (!isValidExtension) {
+                    throw new Exception("Invalid file extension. Only allow " + allowedExtensions.toString());
+                }
+
+                filename = this.fileService.storeFile(avatar, "avatars");
             }
-
-            String fileName = avatar.getOriginalFilename();
-            List<String> allowedExtensions = Arrays.asList("pdf", "jpg", "jpeg", "png",
-                    "doc", "docx");
-            boolean isValidExtension = allowedExtensions.stream()
-                    .anyMatch(item -> fileName.toLowerCase().endsWith("." + item));
-
-            if (!isValidExtension) {
-                throw new Exception("Invalid file extension. Only allow " +
-                        allowedExtensions.toString());
-            }
-
-            String filename = this.fileService.storeFile(avatar, "avatars");
-
             // UpdateUserDTO safeDto = updatedUserDTO != null ? updatedUserDTO : new
             // UpdateUserDTO();
 

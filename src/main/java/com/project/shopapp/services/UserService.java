@@ -120,21 +120,23 @@ public class UserService implements IUserService {
         // if (updatedUserDTO == null) {
         // updatedUserDTO = new UpdateUserDTO();
         // }
-        String newPhoneNumber = updatedUserDTO.getPhoneNumber();
-        if (!existingUser.getPhoneNumber().equals(newPhoneNumber) &&
-                userRepository.existsByPhoneNumber(newPhoneNumber)) {
-            throw new DataIntegrityViolationException("Phone number already exists");
-        }
+        // String newPhoneNumber = updatedUserDTO.getPhoneNumber();
+        // if (!existingUser.getPhoneNumber().equals(newPhoneNumber) &&
+        // userRepository.existsByPhoneNumber(newPhoneNumber)) {
+        // throw new DataIntegrityViolationException("Phone number already exists");
+        // }
 
-        this.fileService.updateUserAvatar(existingUser, filename);
+        if (filename != null && !filename.isEmpty()) {
+            this.fileService.updateUserAvatar(existingUser, filename);
+        }
 
         // Update user information based on the DTO
         if (updatedUserDTO.getFullName() != null) {
             existingUser.setFullName(updatedUserDTO.getFullName());
         }
-        if (newPhoneNumber != null) {
-            existingUser.setPhoneNumber(newPhoneNumber);
-        }
+        // if (newPhoneNumber != null) {
+        // existingUser.setPhoneNumber(newPhoneNumber);
+        // }
         if (updatedUserDTO.getAddress() != null) {
             existingUser.setAddress(updatedUserDTO.getAddress());
         }
@@ -145,12 +147,12 @@ public class UserService implements IUserService {
         if (updatedUserDTO.getDateOfBirth() != null) {
             existingUser.setDateOfBirth(updatedUserDTO.getDateOfBirth());
         }
-        if (updatedUserDTO.getFacebookAccountId() > 0) {
-            existingUser.setFacebookAccountId(updatedUserDTO.getFacebookAccountId());
-        }
-        if (updatedUserDTO.getGoogleAccountId() > 0) {
-            existingUser.setGoogleAccountId(updatedUserDTO.getGoogleAccountId());
-        }
+        // if (updatedUserDTO.getFacebookAccountId() > 0) {
+        // existingUser.setFacebookAccountId(updatedUserDTO.getFacebookAccountId());
+        // }
+        // if (updatedUserDTO.getGoogleAccountId() > 0) {
+        // existingUser.setGoogleAccountId(updatedUserDTO.getGoogleAccountId());
+        // }
 
         // Update the password if it is provided in the DTO
         if (updatedUserDTO.getPassword() != null
