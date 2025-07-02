@@ -1,0 +1,40 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: shopapp
+  # datasource:
+  #   url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/ShopApp?useSSL=false&serverTimezone=UTC}
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   username: root
+  #   password: ${MYSQL_ROOT_PASSWORD:root}
+  datasource:
+    url: jdbc:mysql://localhost:3306/shopapp?useSSL=false&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+       dialect: org.hibernate.dialect.MySQL8Dialect
+      format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    default-locale: en
+api:
+  prefix: api/v1
+jwt:
+  expiration: 86400 # 1 day = 24 * 60 * 60 seconds
+  expiration-refresh-token: 604800 # 7 days = 7 * 24 * 60 * 60 seconds
+
+  secretKey: pQqqsu6+P1/ea3XSKpuF2+Zv3X6xSk72ciAS0Q4JoxY=
+
+logging.level.org.springframework.security: DEBUG
