@@ -22,6 +22,8 @@ public class ProductResponse extends BaseResponse {
     private String description;
     @JsonProperty("category_id")
     private Long categoryId;
+
+    @JsonProperty("product_images")
     private List<String> productImages; // Danh sách URL của ảnh
 
     public static ProductResponse fromProduct(Product product) {

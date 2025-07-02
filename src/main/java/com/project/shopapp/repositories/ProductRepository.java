@@ -10,19 +10,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    boolean existsByName(String name);
-    Page<Product> findAll(Pageable pageable);//phân trang
-    Page<Product> findByCategory_Id(Long categoryId, Pageable pageable);
-    @Query("SELECT p FROM Product p WHERE " +
-            "(:categoryId IS NULL OR :categoryId = 0 OR p.category.id = :categoryId) " +
-            "AND (:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%)")
-    Page<Product> searchProducts
-            (@Param("categoryId") Long categoryId,
-             @Param("keyword") String keyword, Pageable pageable);
+        boolean existsByName(String name);
 
-    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
-    Optional<Product> getDetailProduct(@Param("productId") Long productId);
+        // Page<Product> findAll(Pageable pageable);//phân trang
+        Page<Product> findByCategory_Id(Long categoryId, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.id IN :productIds")
-    List<Product> findProductsByIds(@Param("productIds") List<Long> productIds);
+        @Query("SELECT p FROM Product p WHERE " +
+                        "(:categoryId IS NULL OR :categoryId = 0 OR p.category.id = :categoryId) " +
+                        "AND (:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%)")
+        Page<Product> searchProducts(@Param("categoryId") Long categoryId,
+                        @Param("keyword") String keyword, Pageable pageable);
+
+        @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
+        Optional<Product> getDetailProduct(@Param("productId") Long productId);
+
+        @Query("SELECT p FROM Product p WHERE p.id IN :productIds")
+        List<Product> findProductsByIds(@Param("productIds") List<Long> productIds);
 }

@@ -5,6 +5,7 @@ import com.project.shopapp.models.User;
 import com.project.shopapp.responses.LoginResponse;
 import com.project.shopapp.responses.RegisterResponse;
 import com.project.shopapp.responses.UserResponse;
+import com.project.shopapp.services.FileService;
 import com.project.shopapp.services.ITokenService;
 import com.project.shopapp.services.IUserService;
 import com.project.shopapp.components.LocalizationUtils;
@@ -15,12 +16,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.project.shopapp.dtos.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -30,6 +35,7 @@ public class UserController {
     private final IUserService userService;
     private final ITokenService tokenService;
     private final LocalizationUtils localizationUtils;
+    private final FileService fileService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> createUser(
@@ -87,14 +93,7 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     LoginResponse.builder()
-                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage())) // Trực
-                                                                                                                      // tiếp
-                                                                                                                      // sử
-                                                                                                                      // dụng
-                                                                                                                      // thông
-                                                                                                                      // báo
-                                                                                                                      // từ
-                                                                                                                      // exception
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
                             .build());
         }
         // Trả về token trong response
@@ -136,12 +135,17 @@ public class UserController {
         }
     }
 
-    @PutMapping("/details/{userId}")
+    // @PostMapping(value = "/details/{userId}", consumes =
+    // MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    // @PostMapping("/details/{userId}")
     // @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     // @Operation(security = { @SecurityRequirement(name = "bearer-key") })
-    public ResponseEntity<UserResponse> updateUserDetails(
+    @PutMapping(value = "/details/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateUserDetails(
             @PathVariable Long userId,
-            @RequestBody UpdateUserDTO updatedUserDTO,
+            @RequestPart(value = "user", required = false) UpdateUserDTO updatedUserDTO,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar,
             @RequestHeader("Authorization") String authorizationHeader) {
         try {
             String extractedToken = authorizationHeader.substring(7);
@@ -150,7 +154,32 @@ public class UserController {
             if (user.getId() != userId) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            User updatedUser = userService.updateUser(userId, updatedUserDTO);
+
+            // lưu file
+            String filename = null;
+
+            if (avatar != null && !avatar.isEmpty()) {
+                if (avatar.getSize() > 10 * 1024 * 1024) { // >10MB
+                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                            .body(localizationUtils.getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
+                }
+
+                String fileName = avatar.getOriginalFilename();
+                List<String> allowedExtensions = Arrays.asList("pdf", "jpg", "jpeg", "png", "doc", "docx");
+                boolean isValidExtension = allowedExtensions.stream()
+                        .anyMatch(ext -> fileName.toLowerCase().endsWith("." + ext));
+
+                if (!isValidExtension) {
+                    throw new Exception("Invalid file extension. Only allow " + allowedExtensions.toString());
+                }
+
+                filename = this.fileService.storeFile(avatar, "avatars");
+            }
+            // UpdateUserDTO safeDto = updatedUserDTO != null ? updatedUserDTO : new
+            // UpdateUserDTO();
+
+            User updatedUser = userService.updateUser(userId, updatedUserDTO, filename);
+
             return ResponseEntity.ok(UserResponse.fromUser(updatedUser));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

@@ -1,15 +1,22 @@
 server:
   port: 8088
 spring:
+  application:
+    name: shopappkma
+  # datasource:
+  #   url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/ShopApp?useSSL=false&serverTimezone=UTC}
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   username: root
+  #   password: ${MYSQL_ROOT_PASSWORD:root}
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/ShopApp?useSSL=false&serverTimezone=UTC}
+    url: jdbc:mysql://localhost:3306/shopappkma?useSSL=false&serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: ${MYSQL_ROOT_PASSWORD:root}
+    password:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
        dialect: org.hibernate.dialect.MySQL8Dialect

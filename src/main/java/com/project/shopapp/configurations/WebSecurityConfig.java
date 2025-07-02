@@ -139,6 +139,22 @@ public class WebSecurityConfig {
                                                         .requestMatchers(GET,
                                                                         String.format("%s/healthcheck/**", apiPrefix))
                                                         .permitAll()
+
+                                                        .requestMatchers(POST,
+                                                                        String.format("%s/users/uploads/**", apiPrefix))
+                                                        .hasAnyRole(Role.ADMIN, Role.USER)
+
+                                                        .requestMatchers(GET,
+                                                                        String.format("%s/avatars/**", apiPrefix))
+                                                        .permitAll()
+
+                                                        .requestMatchers(PUT,
+                                                                        String.format("%s/users/**", apiPrefix))
+                                                        .hasAnyRole(Role.ADMIN, Role.USER)
+
+                                                        .requestMatchers(GET,
+                                                                        String.format("%s/images/**", apiPrefix))
+                                                        .permitAll()
                                                         .anyRequest().authenticated();
 
                                 })

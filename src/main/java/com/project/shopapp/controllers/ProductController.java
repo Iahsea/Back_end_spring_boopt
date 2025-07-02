@@ -64,92 +64,100 @@ public class ProductController {
         }
     }
 
-    @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // POST http://localhost:8088/v1/api/products
-    public ResponseEntity<?> uploadImages(
-            @PathVariable("id") Long productId,
-            @RequestParam("files") List<MultipartFile> files) {
-        try {
-            Product existingProduct = iproductService.getProductById(productId);
-            files = files == null ? new ArrayList<MultipartFile>() : files;
-            if (files.size() > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT) {
-                return ResponseEntity.badRequest().body(localizationUtils
-                        .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_MAX_5));
-            }
-            List<ProductImage> productImages = new ArrayList<>();
-            for (MultipartFile file : files) {
-                if (file.getSize() == 0) {
-                    continue;
-                }
-                // Kiểm tra kích thước file và định dạng
-                if (file.getSize() > 10 * 1024 * 1024) { // Kích thước > 10MB
-                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                            .body(localizationUtils
-                                    .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
-                }
-                String contentType = file.getContentType();
-                if (contentType == null || !contentType.startsWith("image/")) {
-                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                            .body(localizationUtils.getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_MUST_BE_IMAGE));
-                }
-                // Lưu file và cập nhật thumbnail trong DTO
-                String filename = storeFile(file); // Thay thế hàm này với code của bạn để lưu file
-                // lưu vào đối tượng product trong DB => sẽ làm sau
-                // lưu vào bảng product_images
-                ProductImage productImage = iproductService.createProductImage(
-                        existingProduct.getId(),
-                        ProductImageDTO.builder()
-                                .imageUrl(filename)
-                                .build());
-                productImages.add(productImage);
-            }
-            return ResponseEntity.ok().body(productImages);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+    // <<<<<<< HEAD
+    // =======
+    // @PostMapping(value = "uploads/{id}", consumes =
+    // MediaType.MULTIPART_FORM_DATA_VALUE)
+    // // POST http://localhost:8088/v1/api/products
+    // public ResponseEntity<?> uploadImages(
+    // @PathVariable("id") Long productId,
+    // @RequestParam("files") List<MultipartFile> files) {
+    // try {
+    // Product existingProduct = iproductService.getProductById(productId);
+    // files = files == null ? new ArrayList<MultipartFile>() : files;
+    // if (files.size() > ProductImage.MAXIMUM_IMAGES_PER_PRODUCT) {
+    // return ResponseEntity.badRequest().body(localizationUtils
+    // .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_MAX_5));
+    // }
+    // List<ProductImage> productImages = new ArrayList<>();
+    // for (MultipartFile file : files) {
+    // if (file.getSize() == 0) {
+    // continue;
+    // }
+    // // Kiểm tra kích thước file và định dạng
+    // if (file.getSize() > 10 * 1024 * 1024) { // Kích thước > 10MB
+    // return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+    // .body(localizationUtils
+    // .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
+    // }
+    // String contentType = file.getContentType();
+    // if (contentType == null || !contentType.startsWith("image/")) {
+    // return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+    // .body(localizationUtils.getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_MUST_BE_IMAGE));
+    // }
+    // // Lưu file và cập nhật thumbnail trong DTO
+    // String filename = storeFile(file); // Thay thế hàm này với code của bạn để
+    // lưu file
+    // // lưu vào đối tượng product trong DB => sẽ làm sau
+    // // lưu vào bảng product_images
+    // ProductImage productImage = iproductService.createProductImage(
+    // existingProduct.getId(),
+    // ProductImageDTO.builder()
+    // .imageUrl(filename)
+    // .build());
+    // productImages.add(productImage);
+    // }
+    // return ResponseEntity.ok().body(productImages);
+    // } catch (Exception e) {
+    // return ResponseEntity.badRequest().body(e.getMessage());
+    // }
+    // }
 
-    @GetMapping("/images/{imageName}")
-    public ResponseEntity<?> viewImage(@PathVariable String imageName) {
-        try {
-            java.nio.file.Path imagePath = Paths.get("uploads/" + imageName);
-            UrlResource resource = new UrlResource(imagePath.toUri());
+    // @GetMapping("/images/{imageName}")
+    // public ResponseEntity<?> viewImage(@PathVariable String imageName) {
+    // try {
+    // java.nio.file.Path imagePath = Paths.get("uploads/" + imageName);
+    // UrlResource resource = new UrlResource(imagePath.toUri());
 
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
-                // return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // if (resource.exists()) {
+    // return ResponseEntity.ok()
+    // .contentType(MediaType.IMAGE_JPEG)
+    // .body(resource);
+    // } else {
+    // return ResponseEntity.ok()
+    // .contentType(MediaType.IMAGE_JPEG)
+    // .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
+    // // return ResponseEntity.notFound().build();
+    // }
+    // } catch (Exception e) {
+    // return ResponseEntity.notFound().build();
+    // }
+    // }
 
-    private String storeFile(MultipartFile file) throws IOException {
-        if (!isImagesFile(file) || file.getOriginalFilename() == null) {
-            throw new IOException("Invalid image format");
-        }
-        String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        // Thêm UUID vào trước tên file để đảm bảo tên file là duy nhất
-        String uniqueFilename = UUID.randomUUID().toString() + "_" + filename;
-        // Đường dẫn đến thư mục mà bạn muốn lưu file
-        java.nio.file.Path uploadDir = Paths.get("uploads");
-        // Kiểm tra và tạo thư mục nếu nó không tồn tại
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        // Đường dẫn đầy đủ đến file
-        java.nio.file.Path destination = Paths.get(uploadDir.toString(), uniqueFilename);
-        // Sao chép file vào thư mục đích
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-        return uniqueFilename;
-    }
+    // private String storeFile(MultipartFile file) throws IOException {
+    // if (!isImagesFile(file) || file.getOriginalFilename() == null) {
+    // throw new IOException("Invalid image format");
+    // }
+    // String filename =
+    // StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+    // // Thêm UUID vào trước tên file để đảm bảo tên file là duy nhất
+    // String uniqueFilename = UUID.randomUUID().toString() + "_" + filename;
+    // // Đường dẫn đến thư mục mà bạn muốn lưu file
+    // java.nio.file.Path uploadDir = Paths.get("uploads");
+    // // Kiểm tra và tạo thư mục nếu nó không tồn tại
+    // if (!Files.exists(uploadDir)) {
+    // Files.createDirectories(uploadDir);
+    // }
+    // // Đường dẫn đầy đủ đến file
+    // java.nio.file.Path destination = Paths.get(uploadDir.toString(),
+    // uniqueFilename);
+    // // Sao chép file vào thư mục đích
+    // Files.copy(file.getInputStream(), destination,
+    // StandardCopyOption.REPLACE_EXISTING);
+    // return uniqueFilename;
+    // }
 
+    // >>>>>>> main
     @GetMapping("")
     public ResponseEntity<ProductListResponse> getProducts(
             @RequestParam(defaultValue = "") String keyword,

@@ -36,6 +36,9 @@ public class UserResponse {
     @JsonProperty("google_account_id")
     private int googleAccountId;
 
+    @JsonProperty("user_avatar")
+    private String userAvatar;
+
     @JsonProperty("role")
     private com.project.shopapp.models.Role role;
 
@@ -48,6 +51,7 @@ public class UserResponse {
                 .active(user.isActive())
                 .dateOfBirth(user.getDateOfBirth())
                 .facebookAccountId(user.getFacebookAccountId())
+                .userAvatar(user.getUserAvatar() != null ? user.getUserAvatar().getImageUrl() : "123")
                 .googleAccountId(user.getGoogleAccountId())
                 .role(user.getRole())
                 .build();

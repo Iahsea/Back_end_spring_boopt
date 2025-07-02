@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IProductService {
     Product createProduct(ProductDTO productDTO) throws Exception;
@@ -24,9 +25,9 @@ public interface IProductService {
 
     boolean existsByName(String name);
 
-    ProductImage createProductImage(
-            Long productId,
-            ProductImageDTO productImageDTO) throws Exception;
+    // ProductImage createProductImage(
+    // Long productId,
+    // ProductImageDTO productImageDTO) throws Exception;
 
     Page<ProductResponse> getProductByCategoryId(Long categoryId, PageRequest pageRequest);
 

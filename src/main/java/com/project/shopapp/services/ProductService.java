@@ -94,26 +94,28 @@ public class ProductService implements IProductService {
         return productRepository.existsByName(name);
     }
 
-    @Override
-    public ProductImage createProductImage(
-            Long productId,
-            ProductImageDTO productImageDTO) throws Exception {
-        Product existingProduct = productRepository
-                .findById(productId)
-                .orElseThrow(() -> new DataNotFoundException(
-                        "Cannot find product with id: " + productImageDTO.getProductId()));
-        ProductImage newProductImage = ProductImage.builder()
-                .product(existingProduct)
-                .imageUrl(productImageDTO.getImageUrl())
-                .build();
-        int size = productImageRepository.findByProductId(productId).size();
-        if (size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT) {
-            throw new InvalidParamException(
-                    "Number of images must be <= "
-                            + ProductImage.MAXIMUM_IMAGES_PER_PRODUCT);
-        }
-        return productImageRepository.save(newProductImage);
-    }
+    // @Override
+    // <<<<<<< HEAD
+    // =======
+    // public ProductImage createProductImage(
+    // Long productId,
+    // ProductImageDTO productImageDTO) throws Exception {
+    // Product existingProduct = productRepository
+    // .findById(productId)
+    // .orElseThrow(() -> new DataNotFoundException(
+    // "Cannot find product with id: " + productImageDTO.getProductId()));
+    // ProductImage newProductImage = ProductImage.builder()
+    // .product(existingProduct)
+    // .imageUrl(productImageDTO.getImageUrl())
+    // .build();
+    // int size = productImageRepository.findByProductId(productId).size();
+    // if (size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT) {
+    // throw new InvalidParamException(
+    // "Number of images must be <= "
+    // + ProductImage.MAXIMUM_IMAGES_PER_PRODUCT);
+    // }
+    // return productImageRepository.save(newProductImage);
+    // }
 
     @Override
     public Page<ProductResponse> getProductByCategoryId(Long categoryId, PageRequest pageRequest) {

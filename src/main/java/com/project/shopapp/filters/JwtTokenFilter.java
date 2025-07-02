@@ -1,7 +1,5 @@
 package com.project.shopapp.filters;
 
-
-
 import com.project.shopapp.components.JwtTokenUtils;
 import com.project.shopapp.models.User;
 import jakarta.servlet.FilterChain;
@@ -33,67 +31,65 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain)
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        try{
-            if(isBypassToken(request)){
+        try {
+            if (isBypassToken(request)) {
                 filterChain.doFilter(request, response); // enable bypass
                 return;
             }
             final String authHeader = request.getHeader("Authorization");
-            if(authHeader == null || !authHeader.startsWith("Bearer ")){
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                 return;
             }
             final String token = authHeader.substring(7);
             final String phoneNumber = jwtTokenUtil.extractPhoneNumber(token);
-            if(phoneNumber != null
-                    && SecurityContextHolder.getContext().getAuthentication() == null){
+            if (phoneNumber != null
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
                 User userDetails = (User) userDetailsService.loadUserByUsername(phoneNumber);
-                if(jwtTokenUtil.validateToken(token, userDetails)){
-                    UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                if (jwtTokenUtil.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
             }
             filterChain.doFilter(request, response);
-        }catch (Exception e){
+        } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
         }
     }
 
-    private boolean isBypassToken(@NonNull HttpServletRequest request){
+    private boolean isBypassToken(@NonNull HttpServletRequest request) {
         final List<Pair<String, String>> bypassTokens = Arrays.asList(
                 // Healthcheck request, no JWT token required
                 Pair.of(String.format("%s/healthcheck/health", apiPrefix), "GET"),
                 Pair.of(String.format("%s/roles", apiPrefix), "GET"),
+                Pair.of(String.format("%s/avatars", apiPrefix), "GET"),
                 Pair.of(String.format("%s/products", apiPrefix), "GET"),
                 Pair.of(String.format("%s/categories", apiPrefix), "GET"),
                 Pair.of(String.format("%s/users/register", apiPrefix), "POST"),
                 Pair.of(String.format("%s/users/login", apiPrefix), "POST"),
                 Pair.of(String.format("%s/users/refreshToken", apiPrefix), "POST")
 
-
         );
 
         String requestPath = request.getServletPath();
         String requestMethod = request.getMethod();
 
-        if(requestPath.equals(String.format("%s/orders", apiPrefix))
-                && requestMethod.equals("GET")){
+        if (requestPath.equals(String.format("%s/orders", apiPrefix))
+                && requestMethod.equals("GET")) {
             // Allow access to %s/orders
             return true;
         }
 
-        for(Pair<String, String> bypassToken: bypassTokens){
-            if(requestPath.contains(bypassToken.getFirst()) &&
-                    requestMethod.equals(bypassToken.getSecond())){
+        for (Pair<String, String> bypassToken : bypassTokens) {
+            if (requestPath.contains(bypassToken.getFirst()) &&
+                    requestMethod.equals(bypassToken.getSecond())) {
                 return true;
             }
         }
