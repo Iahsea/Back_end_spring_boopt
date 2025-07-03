@@ -108,11 +108,13 @@ public class OrderController {
                 .map(OrderResponse::fromOrder);
         // Lấy tổng số trang
         int totalPages = orderPage.getTotalPages();
+        int totalOrder = (int) orderPage.getTotalElements();
         List<OrderResponse> orderResponses = orderPage.getContent();
         return ResponseEntity.ok(OrderListResponse
                 .builder()
                 .orders(orderResponses)
                 .totalPages(totalPages)
+                .totalOrder(totalOrder)
                 .build());
     }
 }
