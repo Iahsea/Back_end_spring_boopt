@@ -3,16 +3,16 @@ server:
 spring:
   application:
     name: shopappkma
-  # datasource:
-  #   url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/ShopApp?useSSL=false&serverTimezone=UTC}
-  #   driver-class-name: com.mysql.cj.jdbc.Driver
-  #   username: root
-  #   password: ${MYSQL_ROOT_PASSWORD:root}
   datasource:
-    url: jdbc:mysql://localhost:3306/shopappkma?useSSL=false&serverTimezone=UTC
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3307/ShopAppLDB?useSSL=false&serverTimezone=UTC}
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password:
+    password: ${MYSQL_ROOT_PASSWORD:root}
+  # datasource:
+  #   url: jdbc:mysql://localhost:3306/shopappkma?useSSL=false&serverTimezone=UTC
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   username: root
+  #   password:
   jpa:
     show-sql: true
     hibernate:
